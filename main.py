@@ -12,7 +12,7 @@ def nao_entre_em_panico():
 
 @app.route('api/v1/analise', methods=['POST'])
 def analise():
-    return jsonify({"message": request.data})
+    return jsonify({"message": "A função ainda está sendo desenvolvida"})
 
 
 if __name__ == "__main__":
