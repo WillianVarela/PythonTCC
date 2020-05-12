@@ -10,7 +10,7 @@ def nao_entre_em_panico():
         return jsonify({"42": "a resposta para a vida, o universo e tudo mais"})
     return jsonify({"message": "Não entre em pânico!"})
 
-@app.route('api/v1/analise', methods=['POST'])
+@app.route('/api/v1/analise', methods=['POST'])
 def analise():
     return jsonify({"message": "A função ainda está sendo desenvolvida"})
 
