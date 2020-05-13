@@ -1,18 +1,24 @@
 import os
+import deeplearning
 from flask import Flask, jsonify, request
-
 
 app = Flask(__name__)
 
 @app.route('/')
-def nao_entre_em_panico():
-    if request.headers.get('Authorization') == '42':
-        return jsonify({"42": "a resposta para a vida, o universo e tudo mais"})
-    return jsonify({"message": "Não entre em pânico!"})
+def home():
+    return app.send_static_file('home.html')
 
 @app.route('/api/v1/analise', methods=['POST'])
 def analise():
-    return jsonify({"message": "A função ainda está sendo desenvolvida"})
+    ia = deeplearning.DeepLearning()
+    resultado = ia.preditc_IA(request.form['base64'])
+    return jsonify({"message": resultado})
+
+@app.route('/train')
+def train():
+    ia = deeplearning.DeepLearning()
+    ia.training_IA()
+    return jsonify({"message": "ss"})
 
 
 if __name__ == "__main__":
