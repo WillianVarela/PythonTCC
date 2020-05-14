@@ -121,7 +121,7 @@ class DeepLearning(object):
         predict = model.predict(test_image)
         return CLASS_NAMES[np.argmax(predict[0])]
 
-ia = DeepLearning()
-ia.training_IA()
+#ia = DeepLearning()
+#ia.training_IA()
 #ia.preditc_IA('ssss')
 
