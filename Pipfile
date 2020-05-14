@@ -9,6 +9,7 @@ verify_ssl = true
 Flask = "*"
 TensorFlow = "*"
 Pillow = "*"
+scipy = "*"
 
 [requires]
 
