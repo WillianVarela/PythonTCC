@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import os
 import pathlib
 from tensorflow.keras.models import Sequential, load_model
@@ -95,19 +95,19 @@ class DeepLearning(object):
 
         epochs_range = range(10)
 
-        plt.figure(figsize=(8, 8))
-        plt.subplot(1, 2, 1)
-        plt.plot(epochs_range, acc, label='Training Accuracy')
-        plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-        plt.legend(loc='lower right')
-        plt.title('Training and Validation Accuracy')
+        #plt.figure(figsize=(8, 8))
+        #plt.subplot(1, 2, 1)
+        #plt.plot(epochs_range, acc, label='Training Accuracy')
+        #plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+        #plt.legend(loc='lower right')
+        #plt.title('Training and Validation Accuracy')
 
-        plt.subplot(1, 2, 2)
-        plt.plot(epochs_range, loss, label='Training Loss')
-        plt.plot(epochs_range, val_loss, label='Validation Loss')
-        plt.legend(loc='upper right')
-        plt.title('Training and Validation Loss')
-        plt.show()
+        #plt.subplot(1, 2, 2)
+        #plt.plot(epochs_range, loss, label='Training Loss')
+        #plt.plot(epochs_range, val_loss, label='Validation Loss')
+        #plt.legend(loc='upper right')
+        #plt.title('Training and Validation Loss')
+        #plt.show()
         pass
 
     def preditc_IA(self, image_request):
