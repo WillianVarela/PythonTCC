@@ -1,11 +1,11 @@
 import tensorflow as tf
 import numpy as np
+from PIL import Image
 #import matplotlib.pyplot as plt
 import os
 import pathlib
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
-from tensorflow.keras.preprocessing import image
 import base64
 
 BATCH_SIZE = 32
@@ -114,8 +114,8 @@ class DeepLearning(object):
         imgdata = base64.b64decode(image_request)
         with open("predictimg.jpeg", 'wb') as f:
             f.write(imgdata)
-        test_image = image.load_img("predictimg.jpeg", target_size = (128, 128)) 
-        test_image = image.img_to_array(test_image)
+        test_image = tf.keras.preprocessing.image.load_img("predictimg.jpeg", target_size = (128, 128)) 
+        test_image = tf.keras.preprocessing.image.img_to_array(test_image)
         test_image = np.expand_dims(test_image, axis = 0)
         model = load_model('model.h5')
         predict = model.predict(test_image)
