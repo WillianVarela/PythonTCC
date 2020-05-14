@@ -81,8 +81,8 @@ class DeepLearning(object):
 
         model.save("model.h5")
 
-        test_image = image.load_img("predictimg.jpeg", target_size = (128, 128)) 
-        test_image = image.img_to_array(test_image)
+        test_image = tf.keras.preprocessing.image.load_img("predictimg.jpeg", target_size = (128, 128)) 
+        test_image = tf.keras.preprocessing.image.img_to_array(test_image)
         test_image = np.expand_dims(test_image, axis = 0)
         predict = model.predict(test_image)
         print(CLASS_NAMES[np.argmax(predict[0])], predict)
