@@ -17,7 +17,6 @@ valid_dir = pathlib.Path('validation/')
 CLASS_NAMES = []
 CLASS_NAMES = np.array([item.name for item in train_dir.glob('*')])
 
-
 class DeepLearning(object):
     def get_images(self):
         # The 1./255 is to convert from uint8 to float32 in range [0,1].
