@@ -8,7 +8,7 @@ app = Flask(__name__)
 def home():
     return app.send_static_file('home.html')
 
-@app.route('/api/v1/analise', methods=['POST'])
+@app.route('/analise', methods=['POST'])
 def analise():
     ia = deeplearning.DeepLearning()
     resultado = ia.preditc_IA(request.form['base64'])
