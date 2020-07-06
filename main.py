@@ -18,7 +18,7 @@ def analise():
 def train():
     ia = deeplearning.DeepLearning()
     ia.training_IA()
-    return jsonify({"message": "ss"})
+    return jsonify({"message": "A rede foi treinada."})
 
 
 if __name__ == "__main__":

@@ -1,98 +1,84 @@
 import tensorflow as tf
 import numpy as np
-from PIL import Image
-#import matplotlib.pyplot as plt
+#from PIL import Image
+import matplotlib.pyplot as plt
 import os
 import pathlib
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
 import base64
 
-BATCH_SIZE = 32
-IMG_HEIGHT = 128
-IMG_WIDTH = 128
-STEPS_PER_EPOCH = 5
+BATCH_SIZE = 100 # epocas * steps
+IMG_HEIGHT = 200
+IMG_WIDTH = 200
+EPOCHS = 10
+STEPS_TRAIN = 10
+STEPS_VAL = 5
 train_dir = pathlib.Path('train/')
 valid_dir = pathlib.Path('validation/')
 CLASS_NAMES = []
 CLASS_NAMES = np.array([item.name for item in train_dir.glob('*')])
 
 class DeepLearning(object):
+
     def get_images(self):
-        # The 1./255 is to convert from uint8 to float32 in range [0,1].
+        # Normalizando as imagens
         image_generator = tf.keras.preprocessing.image.ImageDataGenerator(
             rescale=1./255,
-            rotation_range=45,
-            width_shift_range=.15,
-            height_shift_range=.15,
-            horizontal_flip=True,
-            # zoom_range=0.5
         )
         image_generator2 = tf.keras.preprocessing.image.ImageDataGenerator(
             rescale=1./255,
-            rotation_range=45,
-            width_shift_range=.15,
-            height_shift_range=.15,
-            horizontal_flip=True,
-            # zoom_range=0.5
         )
+        # Carregando as imagens do diretorio, passando o batch e tamanho assim como a classe
         train_data_gen = image_generator.flow_from_directory(directory=str(train_dir),
                                                              batch_size=BATCH_SIZE,
-                                                             shuffle=True,
                                                              target_size=(
                                                                  IMG_HEIGHT, IMG_WIDTH),
-                                                             classes=list(CLASS_NAMES))
+                                                                 class_mode="categorical"
+                                                             )
         valid_data_gen = image_generator2.flow_from_directory(directory=str(valid_dir),
                                                              batch_size=BATCH_SIZE,
-                                                             shuffle=True,
                                                              target_size=(
                                                                  IMG_HEIGHT, IMG_WIDTH),
-                                                             classes=list(CLASS_NAMES))
+                                                                 class_mode="categorical"
+                                                             )
         return train_data_gen, valid_data_gen
 
     def training_IA(self):
-        train_data_gen, valid_data_gen = DeepLearning.get_images(self)
-        image_train, label_train = next(train_data_gen)
-        image_valid, label_valid = next(valid_data_gen)
-
         model = Sequential([
-            Conv2D(16, (3, 3), padding='same', activation='relu',
-                   input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
+            Conv2D(64, (2, 2), padding='same', activation='relu',
+                   input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)), 
             MaxPooling2D((2, 2)),
-            Dropout(0.2),
+            Dropout(0.2), 
             Conv2D(32, (3, 3), padding='same', activation='relu'),
             MaxPooling2D((2, 2)),
+            Dropout(0.2),
             Conv2D(64, (3, 3), padding='same', activation='relu'),
             MaxPooling2D((2, 2)),
             Dropout(0.2),
             Flatten(),
-            Dense(512, activation='relu'),
-            Dense(2)
+            Dense(256, activation='relu'),
+            Dropout(0.4),
+            Dense(2, activation='sigmoid') 
         ])
-
-        model.compile(optimizer='adam',
-                      loss='categorical_crossentropy',
-                      metrics=['accuracy'])
+        model.compile(optimizer='adam', # otimazar adam padrão
+                      loss='binary_crossentropy', # cassificação binaria
+                      metrics=['accuracy']) # accuracy simples
         model.summary()
-
-        history = model.fit(image_train, label_train, epochs=10, steps_per_epoch=3,
-                            validation_data=(image_valid, label_valid), validation_steps=3)
-
+        train_data_gen, valid_data_gen = DeepLearning.get_images(self)
+        image_train, label_train = next(train_data_gen)
+        image_valid, label_valid = next(valid_data_gen)
+        history = model.fit(image_train, label_train, epochs=EPOCHS, steps_per_epoch=STEPS_TRAIN,
+                            validation_data=(image_valid, label_valid), validation_steps=STEPS_VAL)
         model.save("model.h5")
 
-        test_image = tf.keras.preprocessing.image.load_img("predictimg.jpeg", target_size = (128, 128)) 
-        test_image = tf.keras.preprocessing.image.img_to_array(test_image)
-        test_image = np.expand_dims(test_image, axis = 0)
-        predict = model.predict(test_image)
-        print(CLASS_NAMES[np.argmax(predict[0])], predict)
+        #acc = history.history['accuracy']
+        #val_acc = history.history['val_accuracy']
 
-        acc = history.history['accuracy']
-        val_acc = history.history['val_accuracy']
+        #loss = history.history['loss']
+        #val_loss = history.history['val_loss']
 
-        loss = history.history['loss']
-        val_loss = history.history['val_loss']
-
-        epochs_range = range(10)
+        #epochs_range = range(EPOCHS)
 
         #plt.figure(figsize=(8, 8))
         #plt.subplot(1, 2, 1)
@@ -110,17 +96,19 @@ class DeepLearning(object):
         pass
 
     def preditc_IA(self, image_request):
-        imgdata = base64.b64decode(image_request)
-        with open("predictimg.jpeg", 'wb') as f:
+        imgdata = base64.b64decode(image_request) # decodifica a image de base64
+        with open("predictimg.jpeg", 'wb') as f: # salva a imagem no diretorio do projeto
             f.write(imgdata)
-        test_image = tf.keras.preprocessing.image.load_img("predictimg.jpeg", target_size = (128, 128)) 
-        test_image = tf.keras.preprocessing.image.img_to_array(test_image)
-        test_image = np.expand_dims(test_image, axis = 0)
-        model = load_model('model.h5')
-        predict = model.predict(test_image)
+        # Restaura a imagem utilizando keras
+        test_image = tf.keras.preprocessing.image.load_img("predictimg.jpeg", target_size = (200, 200))  
+        test_image = tf.keras.preprocessing.image.img_to_array(test_image) # Covnerte a imagem para um array
+        test_image = np.expand_dims(test_image, axis = 0) # expande o array
+        model = load_model('model.h5') # restaura o modelo
+        predict = model.predict(test_image) # realiza a predição
+        
+        print(CLASS_NAMES[np.argmax(predict[0])], predict)
         return CLASS_NAMES[np.argmax(predict[0])]
 
 #ia = DeepLearning()
 #ia.training_IA()
 #ia.preditc_IA('ssss')
-
