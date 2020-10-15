@@ -8,10 +8,10 @@ from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D, experimental
 from sklearn.metrics import classification_report, confusion_matrix
 
-BATCH_SIZE = 100 # epocas * steps
+BATCH_SIZE = 32 # epocas * steps
 IMG_HEIGHT = 200
 IMG_WIDTH = 200
-EPOCHS = 10
+EPOCHS = 100
 STEPS_TRAIN = 10
 STEPS_VAL = 5
 train_dir = pathlib.Path('train/')
@@ -120,7 +120,7 @@ class DeepLearning(object):
         loss = history.history['loss']
         val_loss = history.history['val_loss']
 
-        epochs_range = range(EPOCHS)
+        epochs_range = range(len(history.epoch))
 
         plt.figure(figsize=(8, 8))
         plt.subplot(1, 2, 1)
@@ -150,6 +150,6 @@ class DeepLearning(object):
         print(CLASS_NAMES[np.argmax(predict[0])], predict[0])
         return '{"ferrugem": ' + str(predict[0][0]) + ', "sadia": ' + str(predict[0][1]) + '}'
 
-# ia = DeepLearning()
-# ia.training_IA()
+ia = DeepLearning()
+ia.training_IA()
 # ia.preditc_IA('ssss')
