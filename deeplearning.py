@@ -95,18 +95,18 @@ class DeepLearning(object):
         Y_pred = model.predict(valid_data_gen, STEPS_VAL)
         y_pred = np.argmax(Y_pred, axis=1)
         cm = confusion_matrix(valid_data_gen.classes, y_pred)
-        plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-        plt.title(cm_title)
-        plt.xticks(tick_marks, CLASS_NAMES, rotation=45)
-        plt.yticks(tick_marks, CLASS_NAMES)
-        thresh = cm.max() / 2.
-        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-            plt.text(j, i, format(cm[i, j], 'd'), horizontalalignment="center",
-                     color="white" if cm[i, j] > thresh else "black")
-
-        plt.ylabel('Label Verdadeiro')
-        plt.xlabel('Predicted Label')
-        plt.tight_layout()
+        # plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+        # plt.title(cm_title)
+        # plt.xticks(tick_marks, CLASS_NAMES, rotation=45)
+        # plt.yticks(tick_marks, CLASS_NAMES)
+        # thresh = cm.max() / 2.
+        # for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        #     plt.text(j, i, format(cm[i, j], 'd'), horizontalalignment="center",
+        #              color="white" if cm[i, j] > thresh else "black")
+        #
+        # plt.ylabel('Label Verdadeiro')
+        # plt.xlabel('Predicted Label')
+        # plt.tight_layout()
         print(cm_title)
         print(cm)
         print('Classification Report')
@@ -122,19 +122,19 @@ class DeepLearning(object):
 
         epochs_range = range(len(history.epoch))
 
-        plt.figure(figsize=(8, 8))
-        plt.subplot(1, 2, 1)
-        plt.plot(epochs_range, acc, label='Training Accuracy')
-        plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-        plt.legend(loc='lower right')
-        plt.title('Training and Validation Accuracy')
-
-        plt.subplot(1, 2, 2)
-        plt.plot(epochs_range, loss, label='Training Loss')
-        plt.plot(epochs_range, val_loss, label='Validation Loss')
-        plt.legend(loc='upper right')
-        plt.title('Training and Validation Loss')
-        plt.show()
+        # plt.figure(figsize=(8, 8))
+        # plt.subplot(1, 2, 1)
+        # plt.plot(epochs_range, acc, label='Training Accuracy')
+        # plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+        # plt.legend(loc='lower right')
+        # plt.title('Training and Validation Accuracy')
+        #
+        # plt.subplot(1, 2, 2)
+        # plt.plot(epochs_range, loss, label='Training Loss')
+        # plt.plot(epochs_range, val_loss, label='Validation Loss')
+        # plt.legend(loc='upper right')
+        # plt.title('Training and Validation Loss')
+        # plt.show()
     pass
 
     def preditc_IA(self, image_request):
@@ -150,6 +150,6 @@ class DeepLearning(object):
         print(CLASS_NAMES[np.argmax(predict[0])], predict[0])
         return '{"ferrugem": ' + str(predict[0][0]) + ', "sadia": ' + str(predict[0][1]) + '}'
 
-ia = DeepLearning()
-ia.training_IA()
+# ia = DeepLearning()
+# ia.training_IA()
 # ia.preditc_IA('ssss')
