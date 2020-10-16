@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import pathlib
 import base64
 import itertools
@@ -11,7 +11,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 BATCH_SIZE = 32 # epocas * steps
 IMG_HEIGHT = 200
 IMG_WIDTH = 200
-EPOCHS = 100
+EPOCHS = 20
 STEPS_TRAIN = 10
 STEPS_VAL = 5
 train_dir = pathlib.Path('train/')
@@ -24,10 +24,10 @@ class DeepLearning(object):
     def get_images(self):
         # Normalizando as imagens
         image_generator = tf.keras.preprocessing.image.ImageDataGenerator(
-            rescale=1./255,
+            rescale=1./255,featurewise_center=True, featurewise_std_normalization=True
         )
         image_generator2 = tf.keras.preprocessing.image.ImageDataGenerator(
-            rescale=1./255,
+            rescale=1./255,featurewise_center=True, featurewise_std_normalization=True
         )
         # Carregando as imagens do diretorio, passando o batch e tamanho assim como a classe
         train_data_gen = image_generator.flow_from_directory(directory=str(train_dir),
@@ -42,6 +42,7 @@ class DeepLearning(object):
                                                                  IMG_HEIGHT, IMG_WIDTH),
                                                                  class_mode="categorical"
                                                              )
+
         return train_data_gen, valid_data_gen
 
     def training_IA(self):
@@ -56,7 +57,7 @@ class DeepLearning(object):
                    input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)), 
             MaxPooling2D((2, 2)),
             Dropout(0.2), 
-            Conv2D(32, (3, 3), padding='same', activation='relu'),
+            Conv2D(64, (3, 3), padding='same', activation='relu'),
             MaxPooling2D((2, 2)),
             Dropout(0.2),
             Conv2D(128, (3, 3), padding='same', activation='relu'),
@@ -65,7 +66,7 @@ class DeepLearning(object):
             Flatten(),
             Dense(256, activation='sigmoid', kernel_initializer='he_normal'),
             Dropout(0.4),
-            Dense(2, activation='sigmoid') 
+            Dense(2, activation='sigmoid')
         ])
         model.compile(optimizer='adam', # otimazar adam padrão
                       loss='binary_crossentropy', # cassificação binaria
@@ -84,12 +85,11 @@ class DeepLearning(object):
         model.summary()
         model.save("model.h5")
 
-        self.matrix_confusion(model, valid_data_gen)
-        self.plot_result(history)
+        #self.matrix_confusion(model, valid_data_gen)
+        #self.plot_result(history)
         pass
 
     def matrix_confusion(self, model, valid_data_gen):
-        target_names = ['Ferrugem', 'Sadia']
         cm_title = 'Confusion Matrix'
         tick_marks = np.arange(2)
         Y_pred = model.predict(valid_data_gen, STEPS_VAL)
@@ -97,8 +97,8 @@ class DeepLearning(object):
         cm = confusion_matrix(valid_data_gen.classes, y_pred)
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
         plt.title(cm_title)
-        plt.xticks(tick_marks, target_names, rotation=45)
-        plt.yticks(tick_marks, target_names)
+        plt.xticks(tick_marks, CLASS_NAMES, rotation=45)
+        plt.yticks(tick_marks, CLASS_NAMES)
         thresh = cm.max() / 2.
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
             plt.text(j, i, format(cm[i, j], 'd'), horizontalalignment="center",
@@ -110,7 +110,7 @@ class DeepLearning(object):
         print(cm_title)
         print(cm)
         print('Classification Report')
-        print(classification_report(valid_data_gen.classes, y_pred, target_names=target_names))
+        print(classification_report(valid_data_gen.classes, y_pred, target_names=CLASS_NAMES))
     pass
 
     def plot_result(self, history):
