@@ -3,9 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools
 import pathlib
+import cv2
 import base64
 from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D, experimental
+from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D, experimental, GaussianNoise
 from sklearn.metrics import classification_report, confusion_matrix
 
 BATCH_SIZE = 128 # epocas * steps
@@ -50,9 +51,11 @@ class DeepLearning(object):
         data_augmentation = tf.keras.Sequential([
             tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal_and_vertical"),
             tf.keras.layers.experimental.preprocessing.RandomRotation(0.2),
+            tf.keras.layers.experimental.preprocessing.RandomContrast(factor=0.1)
         ])
 
         model = Sequential([
+            tf.keras.layers.experimental.preprocessing.Normalization(),
             data_augmentation, # Realizar considerações para oque melhorou ou pirou para esta função
             Conv2D(32, (2, 2), padding='same', activation='relu', input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
             MaxPooling2D((2, 2)),
@@ -72,7 +75,7 @@ class DeepLearning(object):
                       loss='binary_crossentropy', # cassificação binaria
                       metrics=['accuracy']) # accuracy simples
         # ModelCheckpoint - Salva o modelo com menor loss, ou seja o melhor modelo treinado
-        mdlckpt = tf.keras.callbacks.ModelCheckpoint('model.h5', monitor='val_loss', verbose=1, mode='min',
+        mdlckpt = tf.keras.callbacks.ModelCheckpoint('model_cpk.h5', monitor='val_loss', verbose=1, mode='min',
                                                      save_best_only=True)
 
         # EarlyStop -> Se o loss não diminuir para o treinamento, pois a rede não está aprendendo mais
@@ -106,7 +109,7 @@ class DeepLearning(object):
         thresh = cm.max() / 2.
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
             plt.text(j, i, format(cm[i, j], 'd'), horizontalalignment="center",
-                     color="white" if cm[i, j] > thresh else "black")
+                     color="black" if cm[i, j] > thresh else "black")
 
         plt.ylabel('Label Verdadeiro')
         plt.xlabel('Predicted Label')
@@ -154,6 +157,6 @@ class DeepLearning(object):
         print(CLASS_NAMES[np.argmax(predict[0])], predict[0])
         return '{"ferrugem": ' + str(predict[0][0]) + ', "sadia": ' + str(predict[0][1]) + '}'
 
-ia = DeepLearning()
-ia.training_IA()
+# ia = DeepLearning()
+# ia.training_IA()
 # ia.preditc_IA('ssss')
