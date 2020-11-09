@@ -8,6 +8,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D, experimental, GaussianNoise
 from sklearn.metrics import classification_report, confusion_matrix
+import cv2
 
 BATCH_SIZE = 128
 IMG_HEIGHT = 64
@@ -19,6 +20,10 @@ CLASS_NAMES = np.array([item.name for item in train_dir.glob('*')])
 tf.random.set_seed(221)
 
 class DeepLearning(object):
+
+    def histogram(self, image):
+        image_proc = cv2.calcHist(image,[2],None,[256],[0,256])
+        return image_proc
 
     def get_images(self):
         # Carregando as imagens do diretorio, passando o batch e tamanho assim como a classe
@@ -39,23 +44,18 @@ class DeepLearning(object):
         return train_data_gen, teste_data_gen
 
     def training_IA(self):
-        data_augmentation = tf.keras.Sequential([
-            tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal_and_vertical"),
-            tf.keras.layers.experimental.preprocessing.RandomRotation(0.2),
-        ])
+        train_data_gen, test_data = DeepLearning.get_images(self)
+        image_train, label_train = next(train_data_gen)
+        test_data, teste_valid = next(test_data)
+        img_proc = []
+        for image in image_train:
+            img_proc.append(np.histogram(image, bins=60))
+
 
         model = Sequential([
-            data_augmentation,
-            Conv2D(32, (2, 2),  activation='relu', input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
-            MaxPooling2D((2, 2)),
-            Conv2D(64, (3, 3),  activation='relu'),
-            MaxPooling2D((2, 2)),
-            Conv2D(128, (3, 3),  activation='relu'),
-            MaxPooling2D((2, 2)),
-            Flatten(),
-            Dense(256, activation='relu', kernel_regularizer='l2'),
-            Dropout(.2),
-            Dense(len(CLASS_NAMES), activation='softmax', kernel_regularizer='l2')
+            Dense(256, activation='relu'),
+            Dense(128, activation='relu'),
+            Dense(len(CLASS_NAMES), activation='softmax')
         ])
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
@@ -64,13 +64,7 @@ class DeepLearning(object):
 
         earlystop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=4, mode='min', verbose=1)
 
-        train_data_gen, test_data = DeepLearning.get_images(self)
-        image_train, label_train = next(train_data_gen)
-        test_data, teste_valid = next(test_data)
-        image_train = image_train - np.mean(image_train, axis=0)
-        image_train = image_train / np.std(image_train, axis=0)
-        test_data = test_data - np.mean(test_data, axis=0)
-        test_data = test_data / np.std(test_data, axis=0)
+
 
         history = model.fit(image_train, label_train, epochs=EPOCHS, validation_split=0.2,
                             callbacks=[mdlckpt, earlystop])
@@ -157,6 +151,9 @@ class DeepLearning(object):
         pass
 
 ia = DeepLearning()
+# train_data_gen, test_data = ia.get_images()
+# image_train, label_train = next(train_data_gen)
+# test_data, teste_valid = next(test_data)
 ia.training_IA()
 # ia.download_tflite()
 # test_data = test_data - np.mean(test_data, axis=0)  # zero-centering
