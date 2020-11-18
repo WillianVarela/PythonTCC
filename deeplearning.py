@@ -4,57 +4,68 @@ import matplotlib.pyplot as plt
 import itertools
 import pathlib
 import base64
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, img_to_array
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D, experimental, GaussianNoise
 from sklearn.metrics import classification_report, confusion_matrix
-import cv2
-
-BATCH_SIZE = 128
-IMG_HEIGHT = 64
-IMG_WIDTH = 64
+import cv2, os
+from tensorflow.keras.datasets import mnist
+dim_data = 0
+BATCH_SIZE = 32
+IMG_HEIGHT = 200
+IMG_WIDTH = 200
 EPOCHS = 50
 train_dir = pathlib.Path('train/')
 test_dir = pathlib.Path('test/')
 CLASS_NAMES = np.array([item.name for item in train_dir.glob('*')])
-tf.random.set_seed(221)
+tf.random.set_seed(1)
 
 class DeepLearning(object):
 
-    def histogram(self, image):
-        image_proc = cv2.calcHist(image,[2],None,[256],[0,256])
-        return image_proc
-
-    def get_images(self):
+    def get_images(self, channels=1):
         # Carregando as imagens do diretorio, passando o batch e tamanho assim como a classe
-        train_data_gen = ImageDataGenerator().flow_from_directory(directory=str(train_dir),
-                                                             batch_size=BATCH_SIZE,
+        train_data_gen = ImageDataGenerator().flow_from_directory(directory=str(train_dir), batch_size=775,
                                                              target_size=(
                                                                  IMG_HEIGHT, IMG_WIDTH),
                                                                  class_mode="categorical"
                                                              )
 
-        teste_data_gen = ImageDataGenerator().flow_from_directory(directory=str(test_dir),
-                                                                  batch_size=BATCH_SIZE,
+        teste_data_gen = ImageDataGenerator().flow_from_directory(directory=str(test_dir), batch_size=125,
                                                                   target_size=(
                                                                       IMG_HEIGHT, IMG_WIDTH),
                                                                   class_mode="categorical"
                                                                   )
 
-        return train_data_gen, teste_data_gen
+        image_train, label_train = next(train_data_gen)
+        test_data, teste_valid = next(teste_data_gen)
+
+        dim_data = np.prod(image_train.shape[1:])
+        train_data = image_train.reshape(image_train.shape[0], dim_data)
+        test_data = test_data.reshape(test_data.shape[0], dim_data)
+        td = []
+        for img in train_data:
+            hist, edg = np.histogram(img, bins=256, range=(0, 256))
+            td.append(hist)
+
+        ttd = []
+        for img in test_data:
+            hist, edg = np.histogram(img, bins=256, range=(0, 256))
+            ttd.append(hist)
+
+        return np.array(td), label_train, np.array(ttd), teste_valid
 
     def training_IA(self):
-        train_data_gen, test_data = DeepLearning.get_images(self)
-        image_train, label_train = next(train_data_gen)
-        test_data, teste_valid = next(test_data)
-        img_proc = []
-        for image in image_train:
-            img_proc.append(np.histogram(image, bins=60))
-
+        image_train, label_train, test_data, teste_valid = DeepLearning.get_images(self)
 
         model = Sequential([
-            Dense(256, activation='relu'),
-            Dense(128, activation='relu'),
+            Dense(512, activation='relu', kernel_regularizer='l2'),
+            Dense(256, activation='relu', kernel_regularizer='l2'),
+            Dense(128, activation='relu', kernel_regularizer='l2'),
+            Dense(64, activation='relu', kernel_regularizer='l2'),
+            Dense(32, activation='relu', kernel_regularizer='l2'),
+            Dense(18, activation='relu', kernel_regularizer='l2'),
+            Dense(9, activation='relu', kernel_regularizer='l2'),
+            Dense(5, activation='relu', kernel_regularizer='l2'),
             Dense(len(CLASS_NAMES), activation='softmax')
         ])
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
@@ -67,7 +78,7 @@ class DeepLearning(object):
 
 
         history = model.fit(image_train, label_train, epochs=EPOCHS, validation_split=0.2,
-                            callbacks=[mdlckpt, earlystop])
+                            callbacks=[mdlckpt])
 
         test_loss, test_acc = model.evaluate(test_data, teste_valid)
         print(test_acc)
@@ -203,3 +214,15 @@ ia.training_IA()
 # plt.title('sadia equal')
 #
 # plt.show()
+
+# Faz a varredura do diretório imagens buscando arquivos JPG, JPEG e PNG.
+# diretorio = 'train/ferrugem'
+# arquivos = os.listdir(diretorio)
+# train_data = []
+# for a in arquivos:
+#     if a.lower().endswith('.jpg') or a.lower().endswith('.png') or a.lower().endswith('.jpeg'):
+#         imgC = cv2.imread(diretorio + '/' + a)
+#         x = img_to_array(imgC)
+#         x = x.reshape((1,) + x.shape)
+#         train_data.append(imgC)
+#     cv2.waitKey(0)
