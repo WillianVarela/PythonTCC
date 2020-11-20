@@ -17,6 +17,7 @@ IMG_WIDTH = 200
 EPOCHS = 50
 train_dir = pathlib.Path('train/')
 test_dir = pathlib.Path('test/')
+test_dir2 = pathlib.Path('teste2/')
 CLASS_NAMES = np.array([item.name for item in train_dir.glob('*')])
 tf.random.set_seed(1)
 
@@ -39,20 +40,17 @@ class DeepLearning(object):
         image_train, label_train = next(train_data_gen)
         test_data, teste_valid = next(teste_data_gen)
 
-        dim_data = np.prod(image_train.shape[1:])
-        train_data = image_train.reshape(image_train.shape[0], dim_data)
-        test_data = test_data.reshape(test_data.shape[0], dim_data)
-        td = []
-        for img in train_data:
-            hist, edg = np.histogram(img, bins=256, range=(0, 256))
-            td.append(hist)
+        train = []
+        for img in image_train:
+            hist, edg = np.histogram(img[:, :, 0], bins=256, range=(0, 256))
+            train.append(hist)
 
-        ttd = []
+        test = []
         for img in test_data:
-            hist, edg = np.histogram(img, bins=256, range=(0, 256))
-            ttd.append(hist)
+            hist, edg = np.histogram(img[:, :, 0], bins=256, range=(0, 256))
+            test.append(hist)
 
-        return np.array(td), label_train, np.array(ttd), teste_valid
+        return np.array(train), label_train, np.array(test), teste_valid
 
     def training_IA(self):
         image_train, label_train, test_data, teste_valid = DeepLearning.get_images(self)
@@ -77,7 +75,7 @@ class DeepLearning(object):
 
 
 
-        history = model.fit(image_train, label_train, epochs=EPOCHS, validation_split=0.2,
+        history = model.fit(image_train, label_train, epochs=EPOCHS, validation_split=0.4,
                             callbacks=[mdlckpt])
 
         test_loss, test_acc = model.evaluate(test_data, teste_valid)
@@ -113,6 +111,7 @@ class DeepLearning(object):
         print(cm)
         print('Classification Report')
         print(classification_report(rounded_labels, y_pred, target_names=CLASS_NAMES))
+        plt.show()
     pass
 
     def plot_result(self, history):
@@ -161,11 +160,74 @@ class DeepLearning(object):
         open("converted_model.tflite", "wb").write(tflite_model)
         pass
 
+    def plot_image(self, i, predictions_array, true_label, img):
+        predictions_array, true_label, img = predictions_array[i], true_label[i], img[i]
+        plt.grid(False)
+        plt.xticks([])
+        plt.yticks([])
+
+        plt.imshow(np.array(img,np.int32))
+
+        predicted_label = np.argmax(predictions_array)
+        if predicted_label == np.argmax(true_label):
+            color = 'green'
+        else:
+            color = 'red'
+
+        plt.xlabel("{} {:2.0f}% ({})".format(CLASS_NAMES[predicted_label],
+                                             100 * np.max(predictions_array),
+                                             CLASS_NAMES[np.argmax(true_label)]),
+                   color=color)
+
+    def plot_value_array(self, i, predictions_array, true_label):
+        predictions_array, true_label = predictions_array[i], true_label[i]
+        plt.grid(False)
+        tick_marks = np.arange(len(CLASS_NAMES))
+        plt.xticks(tick_marks, CLASS_NAMES)
+        plt.yticks([])
+        thisplot = plt.bar(range(2), predictions_array, color="#777777")
+        plt.ylim([0, 1])
+        predicted_label = np.argmax(predictions_array)
+
+        thisplot[predicted_label].set_color('red')
+        thisplot[np.argmax(true_label)].set_color('green')
+
+    def gerar_dados(self):
+        model = tf.keras.models.load_model('model.h5')
+
+        teste_data_gen = ImageDataGenerator().flow_from_directory(directory=str(test_dir2), batch_size=16,
+                                                                  target_size=(
+                                                                      IMG_HEIGHT, IMG_WIDTH),
+                                                                  class_mode="categorical",
+                                                                  shuffle=False
+                                                                  )
+        test_data, test_labels = next(teste_data_gen)
+
+        test = []
+        for img in test_data:
+            hist, edg = np.histogram(img[:, :, 2], bins=256, range=(0, 256))
+            test.append(hist)
+
+        predictions = model.predict(np.array(test))
+        num_rows = 4
+        num_cols = 4
+        num_images = num_rows * num_cols
+        plt.figure(figsize=(2 * 2 * num_cols, 2 * num_rows))
+        for i in range(num_images):
+            plt.subplot(num_rows, 2 * num_cols, 2 * i + 1)
+            self.plot_image(i, predictions, test_labels, test_data)
+            plt.subplot(num_rows, 2 * num_cols, 2 * i + 2)
+            self.plot_value_array(i, predictions, test_labels)
+        plt.show()
+
+
 ia = DeepLearning()
+# ia.training_IA()
+ia.gerar_dados()
 # train_data_gen, test_data = ia.get_images()
 # image_train, label_train = next(train_data_gen)
 # test_data, teste_valid = next(test_data)
-ia.training_IA()
+# ia.training_IA()
 # ia.download_tflite()
 # test_data = test_data - np.mean(test_data, axis=0)  # zero-centering
 # test_data = test_data / np.std(test_data, axis=0)  # normalization
