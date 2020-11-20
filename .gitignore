@@ -1,4 +1,5 @@
 *.h5
 *.tflite
+__pycache__/deeplearning.cpython-37.pyc
 /__pycache__
 __pycache__/*
