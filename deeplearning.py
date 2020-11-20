@@ -16,7 +16,7 @@ EPOCHS = 50
 train_dir = pathlib.Path('train/')
 test_dir = pathlib.Path('test/')
 CLASS_NAMES = np.array([item.name for item in train_dir.glob('*')])
-tf.random.set_seed(221)
+tf.random.set_seed(1)
 
 class DeepLearning(object):
 
