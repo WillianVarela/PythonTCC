@@ -195,9 +195,9 @@ class DeepLearning(object):
     def gerar_dados(self):
         model = tf.keras.models.load_model('model.h5')
 
-        teste_data_gen = ImageDataGenerator().flow_from_directory(directory=str(test_dir2), batch_size=16,
+        teste_data_gen = ImageDataGenerator().flow_from_directory(directory=str(test_dir2), batch_size=32,
                                                                   target_size=(
-                                                                      IMG_HEIGHT, IMG_WIDTH),
+                                                                      64, 64),
                                                                   class_mode="categorical",
                                                                   shuffle=False
                                                                   )
@@ -208,7 +208,7 @@ class DeepLearning(object):
             hist, edg = np.histogram(img[:, :, 2], bins=256, range=(0, 256))
             test.append(hist)
 
-        predictions = model.predict(np.array(test))
+        predictions = model.predict(test_data)
         num_rows = 4
         num_cols = 4
         num_images = num_rows * num_cols
