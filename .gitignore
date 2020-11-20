@@ -1,3 +1,4 @@
 *.h5
 *.tflite
+/__pycache__
 __pycache__/*
