@@ -200,6 +200,19 @@ class DeepLearning(object):
                                                                   )
         test_data, test_labels = next(teste_data_gen)
 
+        teste_data_gen2 = ImageDataGenerator().flow_from_directory(directory=str(test_dir),
+                                                                  batch_size=BATCH_SIZE,
+                                                                  target_size=(
+                                                                      IMG_HEIGHT, IMG_WIDTH),
+                                                                  class_mode="categorical"
+                                                                  )
+
+        test_data2, teste_valid = next(teste_data_gen2)
+        test_data2 = test_data2 - np.mean(test_data2, axis=0)
+        test_data2 = test_data2 / np.std(test_data2, axis=0)
+        test_loss, test_acc = model.evaluate(test_data2, teste_valid)
+        print(test_acc, test_loss)
+
         predictions = model.predict(test_data)
         num_rows = 4
         num_cols = 4
