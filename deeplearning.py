@@ -170,7 +170,7 @@ class DeepLearning(object):
             color = 'green'
         else:
             color = 'red'
-
+        CLASS_NAMES = ['CF','SF']
         plt.xlabel("{} {:2.0f}% ({})".format(CLASS_NAMES[predicted_label],
                                              100 * np.max(predictions_array),
                                              CLASS_NAMES[np.argmax(true_label)]),
@@ -179,6 +179,8 @@ class DeepLearning(object):
     def plot_value_array(self, i, predictions_array, true_label):
         predictions_array, true_label = predictions_array[i], true_label[i]
         plt.grid(False)
+
+        CLASS_NAMES = ['CF','SF']
         tick_marks = np.arange(len(CLASS_NAMES))
         plt.xticks(tick_marks, CLASS_NAMES)
         plt.yticks([])
@@ -192,26 +194,13 @@ class DeepLearning(object):
     def gerar_dados(self):
         model = tf.keras.models.load_model('model.h5')
 
-        teste_data_gen = ImageDataGenerator().flow_from_directory(directory=str(test_dir2), batch_size=32,
+        teste_data_gen = ImageDataGenerator().flow_from_directory(directory=str(test_dir2), batch_size=BATCH_SIZE,
                                                                   target_size=(
-                                                                      64, 64),
+                                                                      IMG_HEIGHT, IMG_WIDTH),
                                                                   class_mode="categorical",
                                                                   shuffle=False
                                                                   )
         test_data, test_labels = next(teste_data_gen)
-
-        teste_data_gen2 = ImageDataGenerator().flow_from_directory(directory=str(test_dir),
-                                                                  batch_size=BATCH_SIZE,
-                                                                  target_size=(
-                                                                      IMG_HEIGHT, IMG_WIDTH),
-                                                                  class_mode="categorical"
-                                                                  )
-
-        test_data2, teste_valid = next(teste_data_gen2)
-        test_data2 = test_data2 - np.mean(test_data2, axis=0)
-        test_data2 = test_data2 / np.std(test_data2, axis=0)
-        test_loss, test_acc = model.evaluate(test_data2, teste_valid)
-        print(test_acc, test_loss)
 
         predictions = model.predict(test_data)
         num_rows = 4
@@ -229,7 +218,7 @@ class DeepLearning(object):
 ia = DeepLearning()
 #ia.training_IA()
 ia.gerar_dados()
-# ia.download_tflite()
+#ia.download_tflite()
 # test_data = test_data - np.mean(test_data, axis=0)  # zero-centering
 # test_data = test_data / np.std(test_data, axis=0)  # normalization
 # img = cv2.imread('./train/ferrugem/ferrugem_tan_049.png')
